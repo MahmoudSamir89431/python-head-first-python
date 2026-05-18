@@ -13,8 +13,12 @@ def read_swim_data(filename):
     for t in times:
 
     #extract the component parts: start with minute value
-        minutes, rest = t.split(":")
-        seconds, hundrenths = rest.split(".")
+        if ":" in t:
+            minutes, rest = t.split(":")
+            seconds, hundrenths = rest.split(".")
+        else:
+            minutes = 0
+            seconds, hundrenths = t.split(".")
 
     #convert strings to numbers
         converted_time = (int(minutes) *60 *100) + (int(seconds) * 100) + int(hundrenths)
