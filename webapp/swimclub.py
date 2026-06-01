@@ -1,7 +1,13 @@
 import statistics
 import hfpy_utils
+import json
+
+
 CHARTS = "charts/"
 FOLDER = "swimdata/"
+JSONDATA= "records.json"
+
+
 def read_swim_data(filename):
 
     swimmer, age, distance, stroke = filename.removesuffix(".txt").split("-")
@@ -52,9 +58,10 @@ def produce_bar_chart(fn,location=CHARTS):
 <html>
     <head>
       <title>  {title}  </title>
+      <link rel = "stylesheet" href="/static/webapp.css"/>
       </head> 
       <body>
-        <h3> {title} <h3>"""
+        <h2> {title} <h2>"""
     body = ""
     for n,t in enumerate(times):
         bar_width = hfpy_utils.convert2range(converts[n],0,from_max,0,350)
@@ -64,9 +71,15 @@ def produce_bar_chart(fn,location=CHARTS):
                             <rect height="30" width="{bar_width}" style="fill:rgb(0,0,255);" />
                         </svg>{t}<br />
                    """
-
+    with open (JSONDATA) as jf:
+        records = json.load(jf)
+    COURSES = ("LC Men", "LC Women", "SC Men", "SC Women")
+    times = []
+    for course in COURSES :
+        times.append(records[course][event_lookup(fn)])
     footer = f"""
          <p> Average time : {average}</p>
+         <p>M: {times[0]} ({times[2]})<br />W: {times[1]} ({times[3]})</p>
     <body>
 </html>
 """
@@ -76,3 +89,16 @@ def produce_bar_chart(fn,location=CHARTS):
     with open(save_to,"w") as sf:
         print(page, file=sf)
     return save_to
+
+
+def event_lookup (file):
+    conversions = {
+    "Free": "freestyle",
+    "Back": "backstroke",
+    "Breast": "breaststroke",
+    "Fly": "butterfly",
+    "IM": "individual medley",
+}
+    *_, distance, stroke = file.removesuffix(".txt").split("-")
+
+    return f"{distance} {conversions[stroke]}"
